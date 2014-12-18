@@ -19,6 +19,8 @@
 
 &lt;h2 id=&#34;directory-structure:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Directory Structure&lt;/h2&gt;
 
+&lt;p&gt;See &lt;a href=&#34;https://www.evernote.com/l/AD4CCiM7bXRNw7HOaV9HpB7W4Tu3jkbVH8w&#34;&gt;presentation&lt;/a&gt;.&lt;/p&gt;
+
 &lt;pre&gt;&lt;code&gt;static/
 └── js
     ├── _modules
