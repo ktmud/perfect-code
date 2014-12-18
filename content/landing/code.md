@@ -7,6 +7,8 @@ slug: code
 
 ## Directory Structure
 
+See [presentation](https://www.evernote.com/l/AD4CCiM7bXRNw7HOaV9HpB7W4Tu3jkbVH8w).
+
 ```
 static/
 └── js
