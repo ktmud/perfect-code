@@ -225,7 +225,7 @@ var Lightbox = require('bui/lightbox')
 booking.setup({
 	depends: ['ab', 'c']
 	// initialization for all Base/Variants, optional
-	fn: function initialization(variant) {
+	fn: function initialization() {
 		box = new Lightbox();
 		box.setOption('xxx', true);
 	}
