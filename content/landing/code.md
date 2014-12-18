@@ -80,31 +80,50 @@ booking.init();
 For file [static/js/_modules/booking/index.js](https://github.com/ktmud/perfect-code/blob/gh-pages/js/_modules/booking/index.js):
 
 ```javascript
-exports.exp = require('./exp');
-// ... blah blah
+
+exports.track = require('./track');
+exports.env = require('./env');
+
+
+exports.init = require('./runner');
+exports.setup = exports.init.setup;
+
 ```
 
 A call of:
 
 ```javascript
-<TMPL_JS_MODULE booking/exp>
+<TMPL_JS_MODULE booking/index>
 ```
 
 Will be replaced with:
 
 ```javascript
-require.register('booking/exp', function(exports, require, module) {
+require.register('booking/index', function(exports, require, module) {
 
-exports.exp = require('booking/exp');
-// ... blah blah
+exports.track = require('booking/track');
+exports.env = require('booking/env');
+
+
+exports.init = require('booking/runner');
+exports.setup = exports.init.setup;
+
 
 });
 ```
 
-- File path as module name
+- File path as module name (no confused module names!)
 - Must omit suffix
 - relative path in `require()` were converted to absolute path (for statical analysis)
 - If required a directory, will use `directory/index.js`
+
+### Why CommonJS over AMD?
+
+- Explicity dependency management
+- Compact syntax
+- Force you to keep a track on when you are async, when are sync
+- Write like in node.js
+
 
 ### Statical Analysis?
 
