@@ -1,7 +1,0 @@
-theme = "huggle"
-baseurl = "http://ktmud.com"
-languageCode = "en-us"
-title = "a kiloton of mud"
-
-[permalinks]
-landing = "/:slug"
