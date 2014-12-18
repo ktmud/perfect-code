@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
       <title>Landings on a kiloton of mud </title>
-    <link>http://ktmud.com/landing/</link>
+    <link>http://ktmud.github.io/perfect-code/landing/</link>
     <language></language>
     <author></author>
     <rights>Copyright (c) 2008 - 2013, ; all rights reserved.</rights>
@@ -11,10 +11,10 @@
     <item>
       <language></language>
       <title>The &#34;Pefect&#34; Code</title>
-      <link>http://ktmud.com/code</link>
+      <link>http://ktmud.github.io/perfect-code/code</link>
       <pubDate>Wed, 17 Dec 2014 23:05:58 CET</pubDate>
       <author></author>
-      <guid>http://ktmud.com/code</guid>
+      <guid>http://ktmud.github.io/perfect-code/code</guid>
       <description>
 
 &lt;h2 id=&#34;directory-structure:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Directory Structure&lt;/h2&gt;
