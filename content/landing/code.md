@@ -175,10 +175,11 @@ booking.setup({
 	name: '<TMPL_VAR b_expriment_hash_lp_something_need_lightbox>'
 	depends: ['ab', 'c']
 	// initialization for all Base/Variants, optional
-	fn: function initialization(variant) {
+	fn: function initialization() {
 		var hash = this.name;
+		var variant = this.variant;
 		$('body').delegate('.something', 'click', function() {
-			booking.track.custom_goal(this.name, 1);
+			booking.track.custom_goal(hash, 1);
 		});
 	},
 	// base
