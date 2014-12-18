@@ -19,10 +19,12 @@ static/
     │   │   ├── index.js
     │   │   └── track.js
     │   ├── bui
+    │   │   ├── base.js
     │   │   ├── dropdown.js
     │   │   ├── form
     │   │   │   └── validator.js
     │   │   └── lightbox.js
+    │   │   ├── mediator.js
     │   ├── essentials            [1]
     │   │   ├── class.js
     │   │   ├── debug.js
@@ -235,44 +237,66 @@ booking.setup({
 })();
 ```
 
-When fail, delete the file as we do it now.
+When experiment failed, delete the file as we do it now.
 The extra options/methods we added to the UI component can stay there,
 the same feature may be reused at somewhere else anyway.
 
 When wrote with event hooks and/or methods override, it
 should be pretty easy to clean things up too.
 
-The cleanup should never be something trivial, you are supposed
+Cleanup should never be trivial, you are supposed
 to constantly refactor & improve your code.
 
 
+#### Adding new expriment into existing code
 
-### booking.mediator
 
-Global events center.
+```javascript
+(function() {
 
+var booking = require('booking');
+var Lightbox = require('bui/lightbox')
+
+booking.setup({
+	depends: ['ab', 'c']
+	// initialization for all Base/Variants, optional
+	fn: function initialization() {
+		box = new Lightbox();
+		box.setOption('xxx', true);
+		if (booking.env.getVariant('<TMPL_V b_expriment_hash_xxx>')) {
+			// do your thing
+		}
+		// or:
+		// in HTML: <IF in_expriment>data-xxx=""</IF>
+		// if ($('.elem').data('xxx')) {
+		//	// do your thing
+		// }
+	}
+});
+
+})();
 ```
-exports.subscribe = function() {
-}
-exports.publish = function() {
-}
-```
+
 
 ### Summary
 
 The basic toolkit about Booking business (experiments, tracking, etc...)
 should not limit our ways of organizing the code.
-It'd better work both on desktop and mobile, traditional pages and web apps.
-So it's very important to keep it minimal and environment agnostic.
+It's like a library, which should work well on any environment.
+No matter desktop or mobile, traditional pages or web apps.
+It should fit in any kind of coding style and still look good.
+To make it environment agnostic, it's very important to keep it minimal.
 
-So data-attributes, promises, HTMLTemplate compiling in JS would all be too advanced and unnecessary.
+Data attributes, promises, TMPL compiling to JS are all too sugary and unnecessary.
 
-If we can already make the code clean and maitainable with good old plain JS, why introduce many new concepts/styles?
+If we can already make the code clean and maitainable with good old plain JS, why introduce new concepts/styles? It's not the tool we provide making people write bad code, it's the lasiness and insaneness of people. Do proper trainings, spreading good practices, make people feel responsible to their code...
+are the right things to do.
 
-Sugar is nothing more than sugar. Be careful with decayed teeth.
+Providing a lot of sugar will not resolve anything. Sugar is nothing more than sugar.
+It will never become architecture. Be careful with decayed teeth.
 
-Globals are not necessarily evil, the "untraceable" variables. Globals are considered bad because you can easily loose track of it, never be sure about who provided it. If we agree nobody will
-ever override `window`, `booking`, I don't see the necessity of not using it.
+BTW, globals are not necessarily evil, the "untraceable" variables are. Globals are considered bad because you can easily loose track of them, never feel assured about who provided it. If we agree nobody will
+ever override `window`, `booking`, I don't see the necessity of not using them.
 
 
 ## BUI
@@ -282,9 +306,9 @@ Booking UI Components with conventions.
 ### base.js
 
 A boilterplate class, to provide conventions. Inspired by Backbone and CoffeeScript/ES6 Class.
+Not necessarily the recommended way for everyone.
 
 An extentable class with standard methods about events/templates/$dom.
-Not necessarily the recommended way for everyone.
 
 ```javascript
 function Base(options) {
@@ -390,10 +414,22 @@ var Lightbox = BUIBase.extends({
 3. Clearer indication of class methods vs instance methods.
 
 
+### bui.mediator
+
+Global events center.
+
+```
+exports.subscribe = function() {
+}
+exports.publish = function() {
+}
+```
+
 ## Essentials
 
 events, iterators, debug, DOM utility, templates...
 
-Although they are recommended ways, everything here should still be replaceable.
+Although they are recommended ways, they should not be the only way.
+Everything here should be replaceable. In case we found better solutions.
 
 One task one module, you must mannually "inline" or "include" when you need it.
