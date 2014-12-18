@@ -34,10 +34,12 @@
     │   │   ├── index.js
     │   │   └── track.js
     │   ├── bui
+    │   │   ├── base.js
     │   │   ├── dropdown.js
     │   │   ├── form
     │   │   │   └── validator.js
     │   │   └── lightbox.js
+    │   │   ├── mediator.js
     │   ├── essentials            [1]
     │   │   ├── class.js
     │   │   ├── debug.js
@@ -244,41 +246,62 @@ booking.setup({
 })();
 </code></pre>
 
-<p>When fail, delete the file as we do it now.
+<p>When experiment failed, delete the file as we do it now.
 The extra options/methods we added to the UI component can stay there,
 the same feature may be reused at somewhere else anyway.</p>
 
 <p>When wrote with event hooks and/or methods override, it
 should be pretty easy to clean things up too.</p>
 
-<p>The cleanup should never be something trivial, you are supposed
+<p>Cleanup should never be trivial, you are supposed
 to constantly refactor &amp; improve your code.</p>
 
-<h3 id="booking-mediator:cb7f612e17aad7eb26c06709ef92a867">booking.mediator</h3>
+<h4 id="adding-new-expriment-into-existing-code:cb7f612e17aad7eb26c06709ef92a867">Adding new expriment into existing code</h4>
 
-<p>Global events center.</p>
+<pre><code class="language-javascript">(function() {
 
-<pre><code>exports.subscribe = function() {
-}
-exports.publish = function() {
-}
+var booking = require('booking');
+var Lightbox = require('bui/lightbox')
+
+booking.setup({
+	depends: ['ab', 'c']
+	// initialization for all Base/Variants, optional
+	fn: function initialization() {
+		box = new Lightbox();
+		box.setOption('xxx', true);
+		if (booking.env.getVariant('&lt;TMPL_V b_expriment_hash_xxx&gt;')) {
+			// do your thing
+		}
+		// or:
+		// in HTML: &lt;IF in_expriment&gt;data-xxx=&quot;&quot;&lt;/IF&gt;
+		// if ($('.elem').data('xxx')) {
+		//	// do your thing
+		// }
+	}
+});
+
+})();
 </code></pre>
 
 <h3 id="summary:cb7f612e17aad7eb26c06709ef92a867">Summary</h3>
 
 <p>The basic toolkit about Booking business (experiments, tracking, etc&hellip;)
 should not limit our ways of organizing the code.
-It&rsquo;d better work both on desktop and mobile, traditional pages and web apps.
-So it&rsquo;s very important to keep it minimal and environment agnostic.</p>
+It&rsquo;s like a library, which should work well on any environment.
+No matter desktop or mobile, traditional pages or web apps.
+It should fit in any kind of coding style and still look good.
+To make it environment agnostic, it&rsquo;s very important to keep it minimal.</p>
 
-<p>So data-attributes, promises, HTMLTemplate compiling in JS would all be too advanced and unnecessary.</p>
+<p>Data attributes, promises, TMPL compiling to JS are all too sugary and unnecessary.</p>
 
-<p>If we can already make the code clean and maitainable with good old plain JS, why introduce many new concepts/styles?</p>
+<p>If we can already make the code clean and maitainable with good old plain JS, why introduce new concepts/styles? It&rsquo;s not the tool we provide making people write bad code, it&rsquo;s the lasiness and insaneness of people. Do proper trainings, spreading good practices, make people feel responsible to their code&hellip;
+are the right things to do.</p>
 
-<p>Sugar is nothing more than sugar. Be careful with decayed teeth.</p>
+<p>Providing a lot of sugar will not resolve anything. Sugar is nothing more than sugar.
+It will never become architecture. Be careful with decayed teeth.</p>
 
-<p>Globals are not necessarily evil, the &ldquo;untraceable&rdquo; variables. Globals are considered bad because you can easily loose track of it, never be sure about who provided it. If we agree nobody will
-ever override <code>window</code>, <code>booking</code>, I don&rsquo;t see the necessity of not using it.</p>
+<p>BTW, globals are not necessarily evil, the &ldquo;untraceable&rdquo; variables are. Globals are considered bad because you can easily loose track of them, never feel assured about who provided it. If we agree nobody will
+ever override <code>window</code>, <code>booking</code>, I don&rsquo;t see the necessity of not using them.</p>
 
 <h2 id="bui:cb7f612e17aad7eb26c06709ef92a867">BUI</h2>
 
@@ -286,10 +309,10 @@ ever override <code>window</code>, <code>booking</code>, I don&rsquo;t see the n
 
 <h3 id="base-js:cb7f612e17aad7eb26c06709ef92a867">base.js</h3>
 
-<p>A boilterplate class, to provide conventions. Inspired by Backbone and CoffeeScript/ES6 Class.</p>
-
-<p>An extentable class with standard methods about events/templates/$dom.
+<p>A boilterplate class, to provide conventions. Inspired by Backbone and CoffeeScript/ES6 Class.
 Not necessarily the recommended way for everyone.</p>
+
+<p>An extentable class with standard methods about events/templates/$dom.</p>
 
 <pre><code class="language-javascript">function Base(options) {
 	if (!$.isPlainObject(options)) {
@@ -392,11 +415,22 @@ Lightbox.prototype.doSomething = function() {
 <li>Clearer indication of class methods vs instance methods.</li>
 </ol>
 
+<h3 id="bui-mediator:cb7f612e17aad7eb26c06709ef92a867">bui.mediator</h3>
+
+<p>Global events center.</p>
+
+<pre><code>exports.subscribe = function() {
+}
+exports.publish = function() {
+}
+</code></pre>
+
 <h2 id="essentials:cb7f612e17aad7eb26c06709ef92a867">Essentials</h2>
 
 <p>events, iterators, debug, DOM utility, templates&hellip;</p>
 
-<p>Although they are recommended ways, everything here should still be replaceable.</p>
+<p>Although they are recommended ways, they should not be the only way.
+Everything here should be replaceable. In case we found better solutions.</p>
 
 <p>One task one module, you must mannually &ldquo;inline&rdquo; or &ldquo;include&rdquo; when you need it.</p>
 
