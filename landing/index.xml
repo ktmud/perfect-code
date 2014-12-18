@@ -20,36 +20,45 @@
 &lt;h2 id=&#34;directory-structure:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Directory Structure&lt;/h2&gt;
 
 &lt;pre&gt;&lt;code&gt;static/
-└── js/
-    ├── _modules/
-    │   ├── booking/
+└── js
+    ├── _modules
+    │   ├── booking
     │   │   ├── env.js
     │   │   ├── exp.js
     │   │   ├── index.js
     │   │   └── track.js
-    │   │   └── translate.js
-    │   │   └── jstmpl.js
-    │   │   └── ga.js
-    │   ├── bui/
+    │   ├── bui
     │   │   ├── dropdown.js
-    │   │   ├── form/
+    │   │   ├── form
     │   │   │   └── validator.js
     │   │   └── lightbox.js
-    │   ├── essentials/
-    │   │   └── debug.js
+    │   ├── essentials            [1]
+    │   │   ├── class.js
+    │   │   ├── debug.js
+    │   │   ├── eventEmitter.js
+    │   │   └── promise.js
     │   ├── fetch.js
     │   ├── require.js
     │   ├── require2.js
-    │   └── ~jyang2/
+    │   ├── vendor
+    │   │   └── jquery.js
+    │   └── ~jyang2               [2]
     │       └── lightbox2.js
-    ├── landingpages/
+    ├── landingpages              [3]
     │   ├── b.js
     │   ├── c.js
     │   └── exp_a.js
-    └── main/
+    └── main
         ├── 0.modules.js
         └── z.initialize.js
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;booking&lt;/code&gt; is modules only validate within Booking.com context, like tracking, translation, client side HTMLTemplate, env variable management, experiment setup, and how do we initialize things.
+&lt;code&gt;essentials&lt;/code&gt; are more generic things, which are often replaceable with community solutions.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;~username&lt;/code&gt; are modules not mature enough for sharing. Should be moved into &lt;code&gt;bui&lt;/code&gt; when stable.&lt;/li&gt;
+&lt;li&gt;Things in &lt;code&gt;_modules&lt;/code&gt; will not concat into one file. You must inline/include them.&lt;/li&gt;
+&lt;/ol&gt;
 
 &lt;h2 id=&#34;modules:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Modules&lt;/h2&gt;
 
@@ -76,7 +85,7 @@ booking.init();
 
 &lt;p&gt;&lt;code&gt;TMPL_JS_MODULE&lt;/code&gt; will wrap the file in CommonJS style.&lt;/p&gt;
 
-&lt;p&gt;For file &lt;code&gt;static/js/_modules/booking/index.js&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;For file &lt;a href=&#34;https://github.com/ktmud/perfect-code/blob/gh-pages/js/_modules/booking/index.js&#34;&gt;static/js/_modules/booking/index.js&lt;/a&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;exports.exp = require(&#39;./exp&#39;);
 // ... blah blah
@@ -119,41 +128,44 @@ so to find out the duplicate includes, and give developer warnings.&lt;/p&gt;
 
 &lt;h2 id=&#34;booking:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.(&amp;hellip;)&lt;/h2&gt;
 
-&lt;h3 id=&#34;booking-ready:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.ready&lt;/h3&gt;
+&lt;p&gt;A toolkit to support our business.&lt;/p&gt;
 
-&lt;p&gt;A proxy to $.ready with priority support.
-An alternative to sNSStartup.&lt;/p&gt;
+&lt;h3 id=&#34;booking-setup:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.setup&lt;/h3&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;booking.ready(5, function() {
+&lt;p&gt;Setup startup_run and experiments.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;booking.setup(function() {
 });
 
 // Can also be named
-booking.ready({ priority: 5, name: &#39;haha&#39; }, function() {
-})
-// later
-booking.ready({ depends: [&#39;abc&#39;] }, function() {
-})
-// with throw error if dependency has not been registered
-// so you have to at least name your dependency
+booking.setup(&#39;haha&#39;, {
+	priority: 5,
+	fn: function() {
+	}
+});
+booking.setup({
+	depends: [&#39;abc&#39;],
+	on: &#39;load&#39;  // change on DOMReady to onload
+	fn: function() {
+	}
+});
+
+// can even be async
+booking.setup({
+	depends: [&#39;abc&#39;],
+	fn: function(done) {
+		$.getJSON(&#39;/axxx&#39;, function() {
+			// init this thing after data loaded from JSON.
+			done();
+		})
+	}
+});
+
+// will throw error if dependency not been registered
+// so you have to and only need to name your dependency
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h3 id=&#34;booking-exp:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.exp&lt;/h3&gt;
-
-&lt;p&gt;As simple as:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var env = require(&#39;booking/env&#39;);
-
-module.exports = function exp(name) {
-  var expriment = {
-    name: name,
-    hash: name  // add alias
-  };
-  env.expriments[name] = expriment;
-  return experiment;
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Example usage:&lt;/p&gt;
+&lt;p&gt;For experiments:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;// file: static/js/landingpages/exp_lp_something_need_lightbox.js
 
@@ -162,78 +174,78 @@ module.exports = function exp(name) {
 var booking = require(&#39;booking&#39;);
 var Lightbox = require(&#39;bui/lightbox&#39;)
 
-var exp = booking.exp(&#39;&amp;lt;TMPL_VAR b_expriment_hash_lp_something_need_lightbox&#39;);
+var box;
 
-// initialization setup for Base/Variants
-exp.initialize = function(variant) {
-	if (variant != false) {
-		// only do this when experiment stopped?
-		booking.track.custom_goal(this.name, 1);
+booking.setup({
+	name: &#39;&amp;lt;TMPL_VAR b_expriment_hash_lp_something_need_lightbox&amp;gt;&#39;
+	depends: [&#39;ab&#39;, &#39;c&#39;]
+	// initialization for all Base/Variants, optional
+	fn: function initialization(variant) {
+		var hash = this.name;
+		$(&#39;body&#39;).delegate(&#39;.something&#39;, &#39;click&#39;, function() {
+			booking.track.custom_goal(this.name, 1);
+		});
+	},
+	// base
+	v0: function() {
+	},
+	v1: function() {
+		box = new Lightbox();
+	},
+	v2: function() {
+		this.v1();
+		box.setOption(&#39;xxx&#39;, true);
 	}
-};
-
-exp.runVariant = function(variant) {
-  var box = new Lightbox();
-  if (variant == 2) {
-    box.setOption(&#39;xxx&#39;, true);
-  }
-};
+});
 
 })();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Cleanup:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/ktmud/perfect-code/blob/master/static/js/_modules/booking/runner.js&#34;&gt;Behind the curtain&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;This code snippet is not defined as a module, because no need to.
+Why give it a name if nobody will &amp;ldquo;require&amp;rdquo; it?
+It&amp;rsquo;s where we define experiments, an endpoint of using modules.
+The real functionality has already been abstracted into a reusable module.&lt;/p&gt;
+
+&lt;p&gt;For the same reason, we also don&amp;rsquo;t write module methods onto the &lt;code&gt;exp&lt;/code&gt; context,
+except the shared init code amongst variants.&lt;/p&gt;
+
+&lt;p&gt;Every experiment feature is translated into some kind of component api,
+using &lt;code&gt;options.xxx&lt;/code&gt; or &lt;code&gt;.enableXXX()&lt;/code&gt;, or data attributes / class names
+on the elements, which doesn&amp;rsquo;t matter.&lt;/p&gt;
+
+&lt;h4 id=&#34;cleanup:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Cleanup&lt;/h4&gt;
+
+&lt;p&gt;Move variants code into &lt;code&gt;fn&lt;/code&gt;&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;(function() {
 
 var booking = require(&#39;booking&#39;);
 var Lightbox = require(&#39;bui/lightbox&#39;)
 
-booking.ready(function(variant) {
-  var box = new Lightbox();
-  if (variant == 2) {
-    box.setOption(&#39;xxx&#39;, true);
-  }
+booking.setup({
+	depends: [&#39;ab&#39;, &#39;c&#39;]
+	// initialization for all Base/Variants, optional
+	fn: function initialization(variant) {
+		box = new Lightbox();
+		box.setOption(&#39;xxx&#39;, true);
+	}
 });
+
 
 })();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;When initialize:&lt;/p&gt;
+&lt;p&gt;When fail, delete the file as we do it now.
+The extra options/methods we added to the UI component can stay there,
+the same feature may be reused at somewhere else anyway.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;// _modules/booking/index.js
-var env = require(&#39;booking/env&#39;);
+&lt;p&gt;When wrote with event hooks and/or methods override, it
+should be pretty easy to clean things up too.&lt;/p&gt;
 
-exports.init = function() {
-  // run the initializers added by (booking.ready)
-  var $ = require(&#39;jquery&#39;), item;
-  while (queue.length) {
-    item = queue.unshift();
-    $(item.fn);
-  }
-  $(function() {
-		queue = null;
-    // update the ready function to run function immediately
-    exports.ready = function(fn) { fn(); };
-  });
-
-  // run expriments
-  var k, e, variant;
-  for (k in env.experiments) {
-    e = env.experiments[k];
-    variant = env.getVariant(x);
-    if (e.initialize) {
-      e.initialize(variant);
-    }
-    if (e.runVariant) {
-      e.runVariant(variant);
-    }
-  }
-  // you can no longer call experiment setup after booking.init(),
-  // because it won&#39;t work anyway.
-  exports.exp = null;
-};
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The cleanup should never be something trivial, you are supposed
+to constantly refactor &amp;amp; improve your code.&lt;/p&gt;
 
 &lt;h3 id=&#34;booking-mediator:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.mediator&lt;/h3&gt;
 
@@ -245,63 +257,96 @@ exports.publish = function() {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;h3 id=&#34;summary:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Summary&lt;/h3&gt;
+
+&lt;p&gt;The basic toolkit about Booking business (experiments, tracking, etc&amp;hellip;)
+should not limit our ways of organizing the code.
+It&amp;rsquo;d better work both on desktop and mobile, traditional pages and web apps.
+So it&amp;rsquo;s very important to keep it minimal and environment agnostic.&lt;/p&gt;
+
+&lt;p&gt;So data-attributes, promises, HTMLTemplate compiling in JS would all be too advanced and unnecessary.&lt;/p&gt;
+
+&lt;p&gt;If we can already make the code clean and maitainable with good old plain JS, why introduce many new concepts/styles?&lt;/p&gt;
+
+&lt;p&gt;Sugar is nothing more than sugar. Be careful with decayed teeth.&lt;/p&gt;
+
+&lt;p&gt;Globals are not necessarily evil, the &amp;ldquo;untraceable&amp;rdquo; variables. Globals are considered bad because you can easily loose track of it, never be sure about who provided it. If we agree nobody will
+ever override &lt;code&gt;window&lt;/code&gt;, &lt;code&gt;booking&lt;/code&gt;, I don&amp;rsquo;t see the necessity of not using it.&lt;/p&gt;
+
 &lt;h2 id=&#34;bui:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;BUI&lt;/h2&gt;
 
 &lt;p&gt;Booking UI Components with conventions.&lt;/p&gt;
 
 &lt;h3 id=&#34;base-js:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;base.js&lt;/h3&gt;
 
-&lt;p&gt;A boilterplate class, to provide conventions.&lt;/p&gt;
+&lt;p&gt;A boilterplate class, to provide conventions. Inspired by Backbone and CoffeeScript/ES6 Class.&lt;/p&gt;
 
-&lt;p&gt;An extentable class with standard methods about events/templates/$dom.&lt;/p&gt;
+&lt;p&gt;An extentable class with standard methods about events/templates/$dom.
+Not necessarily the recommended way for everyone.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;	function Base(options) {
-		if (!$.isPlainObject(options)) {
-			options = { el: options }
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;function Base(options) {
+	if (!$.isPlainObject(options)) {
+		options = { el: options }
+	}
+	this.options = options = $.extend(true, {}, this.constructor.DEFAULTS, options)
+	this.templates = options.templates;
+	this.init();
+}
+// to have `on`, `off`, `emit` method.
+__extend(Base, EventEmitter);
+
+Base.DEFAULTS = {
+	templates: {}
+}
+
+Base.prototype.init = function() {
+	// assign $el
+	var self = this, $el = $(self.options.el)
+	// script tag content is treated as template for el
+	if ($el[0].tagName == &#39;SCRIPT&#39;) {
+		$el = $($.trim($el.html()))
+	}
+	self.$el = $el
+	self.el = $el[0]
+	// delegate click events within component context
+	self.$el.delegate(&#39;[data-action]&#39;, &#39;click&#39;, function(e) {
+		var data = $(this).data()
+		if (typeof self[data.action] == &#39;function&#39;) {
+			self[data.action](data)
+			e.preventDefault()
+		} else {
+			throw new Error(&#39;Unknown action: &#39; + data.action)
 		}
-		this.options = options = $.extend(true, {}, this.constructor.DEFAULTS, options)
-		this.templates = options.templates;
-		this.init();
-	}
-	// to have `on`, `off`, `emit` method.
-	__extend(Base, EventEmitter);
+	})
+}
 
-	Base.DEFAULTS = {
-		templates: {}
+/**
+ * Render a given section based on `options.templates`
+ * only render one section at a time.
+ *
+ * @return {string|HTMLElement|jQuery}
+ */
+Base.prototype.compose = function(sect, data) {
+	if (!(sect in this.templates)) {
+		throw new Error(&#39;No template for: &#39; + sect);
 	}
-
-	Base.prototype.init = function() {
-		// assign $el
-		var self = this, $el = $(self.options.el)
-		// script tag content is treated as template for el
-		if ($el[0].tagName == &#39;SCRIPT&#39;) {
-			$el = $($.trim($el.html()))
-		}
-		self.$el = $el
-		self.el = $el[0]
-		// delegate click events within component context
-		self.$el.delegate(&#39;[data-action]&#39;, &#39;click&#39;, function(e) {
-			var data = $(this).data()
-			if (typeof self[data.action] == &#39;function&#39;) {
-				self[data.action](data)
-				e.preventDefault()
-			} else {
-				throw new Error(&#39;Unknown action: &#39; + data.action)
-			}
-		})
+	if (&#39;function&#39; == typeof this.templates[sect]) {
+		return this.templates[sect](data)
 	}
+	return this.templates[sect]
+}
 
-	// ... many more
+// ... many more
 
-	Base.prototype.destroy = function() {
-		this.emit(&#39;destroy&#39;)
-		this.$el.remove()
-		this.destroyed = true
-	}
+Base.prototype.destroy = function() {
+	this.emit(&#39;destroy&#39;)
+	this.$el.remove()
+	this.destroyed = true
+}
 
-	Base.prototype.$ = function(query) {
-		return this.$el.find(query)
-	}
+Base.prototype.$ = function(query) {
+	return this.$el.find(query)
+}
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;For &lt;code&gt;bui/index.js&lt;/code&gt;&lt;/p&gt;
@@ -343,6 +388,10 @@ Lightbox.prototype.doSomething = function() {
 &lt;h2 id=&#34;essentials:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Essentials&lt;/h2&gt;
 
 &lt;p&gt;events, iterators, debug, DOM utility, templates&amp;hellip;&lt;/p&gt;
+
+&lt;p&gt;Although they are recommended ways, everything here should still be replaceable.&lt;/p&gt;
+
+&lt;p&gt;One task one module, you must mannually &amp;ldquo;inline&amp;rdquo; or &amp;ldquo;include&amp;rdquo; when you need it.&lt;/p&gt;
 </description>
     </item>
     
