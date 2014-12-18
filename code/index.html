@@ -95,30 +95,50 @@ booking.init();
 
 <p>For file <a href="https://github.com/ktmud/perfect-code/blob/gh-pages/js/_modules/booking/index.js">static/js/_modules/booking/index.js</a>:</p>
 
-<pre><code class="language-javascript">exports.exp = require('./exp');
-// ... blah blah
+<pre><code class="language-javascript">
+exports.track = require('./track');
+exports.env = require('./env');
+
+
+exports.init = require('./runner');
+exports.setup = exports.init.setup;
+
 </code></pre>
 
 <p>A call of:</p>
 
-<pre><code class="language-javascript">&lt;TMPL_JS_MODULE booking/exp&gt;
+<pre><code class="language-javascript">&lt;TMPL_JS_MODULE booking/index&gt;
 </code></pre>
 
 <p>Will be replaced with:</p>
 
-<pre><code class="language-javascript">require.register('booking/exp', function(exports, require, module) {
+<pre><code class="language-javascript">require.register('booking/index', function(exports, require, module) {
 
-exports.exp = require('booking/exp');
-// ... blah blah
+exports.track = require('booking/track');
+exports.env = require('booking/env');
+
+
+exports.init = require('booking/runner');
+exports.setup = exports.init.setup;
+
 
 });
 </code></pre>
 
 <ul>
-<li>File path as module name</li>
+<li>File path as module name (no confused module names!)</li>
 <li>Must omit suffix</li>
 <li>relative path in <code>require()</code> were converted to absolute path (for statical analysis)</li>
 <li>If required a directory, will use <code>directory/index.js</code></li>
+</ul>
+
+<h3 id="why-commonjs-over-amd:cb7f612e17aad7eb26c06709ef92a867">Why CommonJS over AMD?</h3>
+
+<ul>
+<li>Explicity dependency management</li>
+<li>Compact syntax</li>
+<li>Force you to keep a track on when you are async, when are sync</li>
+<li>Write like in node.js</li>
 </ul>
 
 <h3 id="statical-analysis:cb7f612e17aad7eb26c06709ef92a867">Statical Analysis?</h3>

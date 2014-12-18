@@ -91,30 +91,50 @@ booking.init();
 
 &lt;p&gt;For file &lt;a href=&#34;https://github.com/ktmud/perfect-code/blob/gh-pages/js/_modules/booking/index.js&#34;&gt;static/js/_modules/booking/index.js&lt;/a&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;exports.exp = require(&#39;./exp&#39;);
-// ... blah blah
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;
+exports.track = require(&#39;./track&#39;);
+exports.env = require(&#39;./env&#39;);
+
+
+exports.init = require(&#39;./runner&#39;);
+exports.setup = exports.init.setup;
+
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;A call of:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;&amp;lt;TMPL_JS_MODULE booking/exp&amp;gt;
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;&amp;lt;TMPL_JS_MODULE booking/index&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Will be replaced with:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;require.register(&#39;booking/exp&#39;, function(exports, require, module) {
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;require.register(&#39;booking/index&#39;, function(exports, require, module) {
 
-exports.exp = require(&#39;booking/exp&#39;);
-// ... blah blah
+exports.track = require(&#39;booking/track&#39;);
+exports.env = require(&#39;booking/env&#39;);
+
+
+exports.init = require(&#39;booking/runner&#39;);
+exports.setup = exports.init.setup;
+
 
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;ul&gt;
-&lt;li&gt;File path as module name&lt;/li&gt;
+&lt;li&gt;File path as module name (no confused module names!)&lt;/li&gt;
 &lt;li&gt;Must omit suffix&lt;/li&gt;
 &lt;li&gt;relative path in &lt;code&gt;require()&lt;/code&gt; were converted to absolute path (for statical analysis)&lt;/li&gt;
 &lt;li&gt;If required a directory, will use &lt;code&gt;directory/index.js&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;why-commonjs-over-amd:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Why CommonJS over AMD?&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Explicity dependency management&lt;/li&gt;
+&lt;li&gt;Compact syntax&lt;/li&gt;
+&lt;li&gt;Force you to keep a track on when you are async, when are sync&lt;/li&gt;
+&lt;li&gt;Write like in node.js&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h3 id=&#34;statical-analysis:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Statical Analysis?&lt;/h3&gt;
