@@ -24,35 +24,33 @@
 <h2 id="directory-structure:cb7f612e17aad7eb26c06709ef92a867">Directory Structure</h2>
 
 <pre><code>static/
-└── js
-    ├── _modules
-    │   ├── booking
-    │   │   ├── env.js
-    │   │   ├── exp.js
-    │   │   ├── index.js
-    │   │   ├── mediator.js
-    │   │   └── track.js
-    │   │   ├── z.js
-    │   ├── bui
-    │   │   ├── base.js
-    │   │   ├── dropdown.js
-    │   │   └── lightbox.js
-    │   ├── essentials
-    │   │   ├── class.js
-    │   │   ├── debug.js
-    │   │   ├── eventEmitter.js
-    │   │   ├── lang.js
-    │   │   ├── dom.js
-    │   ├── fetch.js
-    │   ├── require.js
-    │   ├── require2.js
-    │   └── ~jyang2
-    │       └── lightbox2.js
-    ├── landingpages
-    │   ├── b.js
-    │   ├── c.js
-    │   └── exp_a.js
-    └── main
+└── js/
+    ├── _modules/
+    │   ├── booking/
+    │   │   ├── env.js
+    │   │   ├── exp.js
+    │   │   ├── index.js
+    │   │   └── track.js
+    │   │   └── translate.js
+    │   │   └── jstmpl.js
+    │   │   └── ga.js
+    │   ├── bui/
+    │   │   ├── dropdown.js
+    │   │   ├── form/
+    │   │   │   └── validator.js
+    │   │   └── lightbox.js
+    │   ├── essentials/
+    │   │   └── debug.js
+    │   ├── fetch.js
+    │   ├── require.js
+    │   ├── require2.js
+    │   └── ~jyang2/
+    │       └── lightbox2.js
+    ├── landingpages/
+    │   ├── b.js
+    │   ├── c.js
+    │   └── exp_a.js
+    └── main/
         ├── 0.modules.js
         └── z.initialize.js
 </code></pre>
@@ -64,9 +62,11 @@
 <pre><code class="language-javascript">&lt;TMPL_INLINE _modules/require.js&gt;
 &lt;TMPL_INLINE _modules/fetch.js&gt;
 
+&lt;TMPL_JS_MODULE booking/index&gt;
+&lt;TMPL_JS_MODULE booking/env&gt;
 &lt;TMPL_JS_MODULE booking/exp&gt;
 &lt;TMPL_JS_MODULE booking/track&gt;
-&lt;TMPL_JS_MODULE booking/util&gt;
+&lt;TMPL_JS_MODULE booking/ga&gt;
 
 &lt;TMPL_JS_MODULE ~jyang2/lightbox2&gt;
 
@@ -104,11 +104,11 @@ exports.exp = require('booking/exp');
 <ul>
 <li>File path as module name</li>
 <li>Must omit suffix</li>
-<li>relative path were converted to absolute path (for static analysis)</li>
-<li>If directory, will use <code>directory/index.js</code></li>
+<li>relative path in <code>require()</code> were converted to absolute path (for statical analysis)</li>
+<li>If required a directory, will use <code>directory/index.js</code></li>
 </ul>
 
-<h3 id="static-analysis:cb7f612e17aad7eb26c06709ef92a867">Static Analysis?</h3>
+<h3 id="statical-analysis:cb7f612e17aad7eb26c06709ef92a867">Statical Analysis?</h3>
 
 <p>Suppose we have multiple script tags in one page.</p>
 
@@ -118,49 +118,62 @@ exports.exp = require('booking/exp');
 
 <p>And both file have included the same module <code>_modules/bui/lightbox.js</code>.</p>
 
-<p>When handling the request, server can analysis these JS files by simple grepping <code>require(.*)</code>, find out the duplicate includes, and give the developer warnings.</p>
+<p>When handling the request, server can analysis these JS files by simple grepping <code>require(.*)</code>,
+so to find out the duplicate includes, and give developer warnings.</p>
 
 <h2 id="booking:cb7f612e17aad7eb26c06709ef92a867">booking.(&hellip;)</h2>
 
 <h3 id="booking-ready:cb7f612e17aad7eb26c06709ef92a867">booking.ready</h3>
 
 <p>A proxy to $.ready with priority support.
-Alternative for sNSStartup.</p>
+An alternative to sNSStartup.</p>
 
-<pre><code class="language-javascript">booking.ready(function() {
-}, 5);
+<pre><code class="language-javascript">booking.ready(5, function() {
+});
+
+// Can also be named
+booking.ready({ priority: 5, name: 'haha' }, function() {
+})
+// later
+booking.ready({ depends: ['abc'] }, function() {
+})
+// with throw error if dependency has not been registered
+// so you have to at least name your dependency
 </code></pre>
 
 <h3 id="booking-exp:cb7f612e17aad7eb26c06709ef92a867">booking.exp</h3>
 
-<p>Code:</p>
+<p>As simple as:</p>
 
-<pre><code class="language-javascript">module.exports = exp
+<pre><code class="language-javascript">var env = require('booking/env');
 
-var env = require('booking/env');
-
-function exp(name) {
+module.exports = function exp(name) {
   var expriment = {
     name: name,
     hash: name  // add alias
   };
   env.expriments[name] = expriment;
   return experiment;
-}
+};
 </code></pre>
 
 <p>Example usage:</p>
 
-<pre><code class="language-javascript">(function() {
+<pre><code class="language-javascript">// file: static/js/landingpages/exp_lp_something_need_lightbox.js
+
+(function() {
 
 var booking = require('booking');
 var Lightbox = require('bui/lightbox')
 
-var exp = booking.exp('&lt;TMPL_VAR b_expriment_hash_xxxx');
+var exp = booking.exp('&lt;TMPL_VAR b_expriment_hash_lp_something_need_lightbox');
 
 // initialization setup for Base/Variants
 exp.initialize = function(variant) {
-  booking.track.custom_goal(this.name, 1);
+	if (variant != false) {
+		// only do this when experiment stopped?
+		booking.track.custom_goal(this.name, 1);
+	}
 };
 
 exp.runVariant = function(variant) {
@@ -168,15 +181,71 @@ exp.runVariant = function(variant) {
   if (variant == 2) {
     box.setOption('xxx', true);
   }
-}
-})()
+};
+
+})();
 </code></pre>
 
-<h3 id="booking-medaitor:cb7f612e17aad7eb26c06709ef92a867">booking.medaitor</h3>
+<p>Cleanup:</p>
 
-<p>Events center, with pub/sub.</p>
+<pre><code class="language-javascript">(function() {
+
+var booking = require('booking');
+var Lightbox = require('bui/lightbox')
+
+booking.ready(function(variant) {
+  var box = new Lightbox();
+  if (variant == 2) {
+    box.setOption('xxx', true);
+  }
+});
+
+})();
+</code></pre>
+
+<p>When initialize:</p>
+
+<pre><code class="language-javascript">// _modules/booking/index.js
+var env = require('booking/env');
+
+exports.init = function() {
+  // run the initializers added by (booking.ready)
+  var $ = require('jquery'), item;
+  while (queue.length) {
+    item = queue.unshift();
+    $(item.fn);
+  }
+  $(function() {
+		queue = null;
+    // update the ready function to run function immediately
+    exports.ready = function(fn) { fn(); };
+  });
+
+  // run expriments
+  var k, e, variant;
+  for (k in env.experiments) {
+    e = env.experiments[k];
+    variant = env.getVariant(x);
+    if (e.initialize) {
+      e.initialize(variant);
+    }
+    if (e.runVariant) {
+      e.runVariant(variant);
+    }
+  }
+  // you can no longer call experiment setup after booking.init(),
+  // because it won't work anyway.
+  exports.exp = null;
+};
+</code></pre>
+
+<h3 id="booking-mediator:cb7f612e17aad7eb26c06709ef92a867">booking.mediator</h3>
+
+<p>Global events center.</p>
 
 <pre><code>exports.subscribe = function() {
+}
+exports.publish = function() {
 }
 </code></pre>
 
@@ -190,6 +259,55 @@ exp.runVariant = function(variant) {
 
 <p>An extentable class with standard methods about events/templates/$dom.</p>
 
+<pre><code class="language-javascript">	function Base(options) {
+		if (!$.isPlainObject(options)) {
+			options = { el: options }
+		}
+		this.options = options = $.extend(true, {}, this.constructor.DEFAULTS, options)
+		this.templates = options.templates;
+		this.init();
+	}
+	// to have `on`, `off`, `emit` method.
+	__extend(Base, EventEmitter);
+
+	Base.DEFAULTS = {
+		templates: {}
+	}
+
+	Base.prototype.init = function() {
+		// assign $el
+		var self = this, $el = $(self.options.el)
+		// script tag content is treated as template for el
+		if ($el[0].tagName == 'SCRIPT') {
+			$el = $($.trim($el.html()))
+		}
+		self.$el = $el
+		self.el = $el[0]
+		// delegate click events within component context
+		self.$el.delegate('[data-action]', 'click', function(e) {
+			var data = $(this).data()
+			if (typeof self[data.action] == 'function') {
+				self[data.action](data)
+				e.preventDefault()
+			} else {
+				throw new Error('Unknown action: ' + data.action)
+			}
+		})
+	}
+
+	// ... many more
+
+	Base.prototype.destroy = function() {
+		this.emit('destroy')
+		this.$el.remove()
+		this.destroyed = true
+	}
+
+	Base.prototype.$ = function(query) {
+		return this.$el.find(query)
+	}
+</code></pre>
+
 <p>For <code>bui/index.js</code></p>
 
 <pre><code class="language-javascript">var Base = require('bui/base');
@@ -199,7 +317,7 @@ exports.cohere = function extends(Component) {
 };
 </code></pre>
 
-<p>Example component:</p>
+<p>Example component, <code>bui/lightbox.js</code>:</p>
 
 <pre><code class="language-javascript">function Lightbox() {
   Lightbox.__super__.apply(this, arguments);
@@ -223,10 +341,12 @@ Lightbox.prototype.doSomething = function() {
 <ol>
 <li>Constructor function will have a reasonable name (easier for debug)</li>
 <li>Less indentations</li>
-<li>Clear indication of class method vs instance method.</li>
+<li>Clearer indication of class methods vs instance methods.</li>
 </ol>
 
 <h2 id="essentials:cb7f612e17aad7eb26c06709ef92a867">Essentials</h2>
+
+<p>events, iterators, debug, DOM utility, templates&hellip;</p>
 
 </div>
 

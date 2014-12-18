@@ -20,35 +20,33 @@
 &lt;h2 id=&#34;directory-structure:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Directory Structure&lt;/h2&gt;
 
 &lt;pre&gt;&lt;code&gt;static/
-└── js
-    ├── _modules
-    │   ├── booking
-    │   │   ├── env.js
-    │   │   ├── exp.js
-    │   │   ├── index.js
-    │   │   ├── mediator.js
-    │   │   └── track.js
-    │   │   ├── z.js
-    │   ├── bui
-    │   │   ├── base.js
-    │   │   ├── dropdown.js
-    │   │   └── lightbox.js
-    │   ├── essentials
-    │   │   ├── class.js
-    │   │   ├── debug.js
-    │   │   ├── eventEmitter.js
-    │   │   ├── lang.js
-    │   │   ├── dom.js
-    │   ├── fetch.js
-    │   ├── require.js
-    │   ├── require2.js
-    │   └── ~jyang2
-    │       └── lightbox2.js
-    ├── landingpages
-    │   ├── b.js
-    │   ├── c.js
-    │   └── exp_a.js
-    └── main
+└── js/
+    ├── _modules/
+    │   ├── booking/
+    │   │   ├── env.js
+    │   │   ├── exp.js
+    │   │   ├── index.js
+    │   │   └── track.js
+    │   │   └── translate.js
+    │   │   └── jstmpl.js
+    │   │   └── ga.js
+    │   ├── bui/
+    │   │   ├── dropdown.js
+    │   │   ├── form/
+    │   │   │   └── validator.js
+    │   │   └── lightbox.js
+    │   ├── essentials/
+    │   │   └── debug.js
+    │   ├── fetch.js
+    │   ├── require.js
+    │   ├── require2.js
+    │   └── ~jyang2/
+    │       └── lightbox2.js
+    ├── landingpages/
+    │   ├── b.js
+    │   ├── c.js
+    │   └── exp_a.js
+    └── main/
         ├── 0.modules.js
         └── z.initialize.js
 &lt;/code&gt;&lt;/pre&gt;
@@ -60,9 +58,11 @@
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;&amp;lt;TMPL_INLINE _modules/require.js&amp;gt;
 &amp;lt;TMPL_INLINE _modules/fetch.js&amp;gt;
 
+&amp;lt;TMPL_JS_MODULE booking/index&amp;gt;
+&amp;lt;TMPL_JS_MODULE booking/env&amp;gt;
 &amp;lt;TMPL_JS_MODULE booking/exp&amp;gt;
 &amp;lt;TMPL_JS_MODULE booking/track&amp;gt;
-&amp;lt;TMPL_JS_MODULE booking/util&amp;gt;
+&amp;lt;TMPL_JS_MODULE booking/ga&amp;gt;
 
 &amp;lt;TMPL_JS_MODULE ~jyang2/lightbox2&amp;gt;
 
@@ -100,11 +100,11 @@ exports.exp = require(&#39;booking/exp&#39;);
 &lt;ul&gt;
 &lt;li&gt;File path as module name&lt;/li&gt;
 &lt;li&gt;Must omit suffix&lt;/li&gt;
-&lt;li&gt;relative path were converted to absolute path (for static analysis)&lt;/li&gt;
-&lt;li&gt;If directory, will use &lt;code&gt;directory/index.js&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;relative path in &lt;code&gt;require()&lt;/code&gt; were converted to absolute path (for statical analysis)&lt;/li&gt;
+&lt;li&gt;If required a directory, will use &lt;code&gt;directory/index.js&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;static-analysis:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Static Analysis?&lt;/h3&gt;
+&lt;h3 id=&#34;statical-analysis:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Statical Analysis?&lt;/h3&gt;
 
 &lt;p&gt;Suppose we have multiple script tags in one page.&lt;/p&gt;
 
@@ -114,49 +114,62 @@ exports.exp = require(&#39;booking/exp&#39;);
 
 &lt;p&gt;And both file have included the same module &lt;code&gt;_modules/bui/lightbox.js&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;When handling the request, server can analysis these JS files by simple grepping &lt;code&gt;require(.*)&lt;/code&gt;, find out the duplicate includes, and give the developer warnings.&lt;/p&gt;
+&lt;p&gt;When handling the request, server can analysis these JS files by simple grepping &lt;code&gt;require(.*)&lt;/code&gt;,
+so to find out the duplicate includes, and give developer warnings.&lt;/p&gt;
 
 &lt;h2 id=&#34;booking:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.(&amp;hellip;)&lt;/h2&gt;
 
 &lt;h3 id=&#34;booking-ready:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.ready&lt;/h3&gt;
 
 &lt;p&gt;A proxy to $.ready with priority support.
-Alternative for sNSStartup.&lt;/p&gt;
+An alternative to sNSStartup.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;booking.ready(function() {
-}, 5);
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;booking.ready(5, function() {
+});
+
+// Can also be named
+booking.ready({ priority: 5, name: &#39;haha&#39; }, function() {
+})
+// later
+booking.ready({ depends: [&#39;abc&#39;] }, function() {
+})
+// with throw error if dependency has not been registered
+// so you have to at least name your dependency
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h3 id=&#34;booking-exp:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.exp&lt;/h3&gt;
 
-&lt;p&gt;Code:&lt;/p&gt;
+&lt;p&gt;As simple as:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;module.exports = exp
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var env = require(&#39;booking/env&#39;);
 
-var env = require(&#39;booking/env&#39;);
-
-function exp(name) {
+module.exports = function exp(name) {
   var expriment = {
     name: name,
     hash: name  // add alias
   };
   env.expriments[name] = expriment;
   return experiment;
-}
+};
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Example usage:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;(function() {
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;// file: static/js/landingpages/exp_lp_something_need_lightbox.js
+
+(function() {
 
 var booking = require(&#39;booking&#39;);
 var Lightbox = require(&#39;bui/lightbox&#39;)
 
-var exp = booking.exp(&#39;&amp;lt;TMPL_VAR b_expriment_hash_xxxx&#39;);
+var exp = booking.exp(&#39;&amp;lt;TMPL_VAR b_expriment_hash_lp_something_need_lightbox&#39;);
 
 // initialization setup for Base/Variants
 exp.initialize = function(variant) {
-  booking.track.custom_goal(this.name, 1);
+	if (variant != false) {
+		// only do this when experiment stopped?
+		booking.track.custom_goal(this.name, 1);
+	}
 };
 
 exp.runVariant = function(variant) {
@@ -164,15 +177,71 @@ exp.runVariant = function(variant) {
   if (variant == 2) {
     box.setOption(&#39;xxx&#39;, true);
   }
-}
-})()
+};
+
+})();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h3 id=&#34;booking-medaitor:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.medaitor&lt;/h3&gt;
+&lt;p&gt;Cleanup:&lt;/p&gt;
 
-&lt;p&gt;Events center, with pub/sub.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;(function() {
+
+var booking = require(&#39;booking&#39;);
+var Lightbox = require(&#39;bui/lightbox&#39;)
+
+booking.ready(function(variant) {
+  var box = new Lightbox();
+  if (variant == 2) {
+    box.setOption(&#39;xxx&#39;, true);
+  }
+});
+
+})();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When initialize:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;// _modules/booking/index.js
+var env = require(&#39;booking/env&#39;);
+
+exports.init = function() {
+  // run the initializers added by (booking.ready)
+  var $ = require(&#39;jquery&#39;), item;
+  while (queue.length) {
+    item = queue.unshift();
+    $(item.fn);
+  }
+  $(function() {
+		queue = null;
+    // update the ready function to run function immediately
+    exports.ready = function(fn) { fn(); };
+  });
+
+  // run expriments
+  var k, e, variant;
+  for (k in env.experiments) {
+    e = env.experiments[k];
+    variant = env.getVariant(x);
+    if (e.initialize) {
+      e.initialize(variant);
+    }
+    if (e.runVariant) {
+      e.runVariant(variant);
+    }
+  }
+  // you can no longer call experiment setup after booking.init(),
+  // because it won&#39;t work anyway.
+  exports.exp = null;
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;booking-mediator:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.mediator&lt;/h3&gt;
+
+&lt;p&gt;Global events center.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;exports.subscribe = function() {
+}
+exports.publish = function() {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -186,6 +255,55 @@ exp.runVariant = function(variant) {
 
 &lt;p&gt;An extentable class with standard methods about events/templates/$dom.&lt;/p&gt;
 
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;	function Base(options) {
+		if (!$.isPlainObject(options)) {
+			options = { el: options }
+		}
+		this.options = options = $.extend(true, {}, this.constructor.DEFAULTS, options)
+		this.templates = options.templates;
+		this.init();
+	}
+	// to have `on`, `off`, `emit` method.
+	__extend(Base, EventEmitter);
+
+	Base.DEFAULTS = {
+		templates: {}
+	}
+
+	Base.prototype.init = function() {
+		// assign $el
+		var self = this, $el = $(self.options.el)
+		// script tag content is treated as template for el
+		if ($el[0].tagName == &#39;SCRIPT&#39;) {
+			$el = $($.trim($el.html()))
+		}
+		self.$el = $el
+		self.el = $el[0]
+		// delegate click events within component context
+		self.$el.delegate(&#39;[data-action]&#39;, &#39;click&#39;, function(e) {
+			var data = $(this).data()
+			if (typeof self[data.action] == &#39;function&#39;) {
+				self[data.action](data)
+				e.preventDefault()
+			} else {
+				throw new Error(&#39;Unknown action: &#39; + data.action)
+			}
+		})
+	}
+
+	// ... many more
+
+	Base.prototype.destroy = function() {
+		this.emit(&#39;destroy&#39;)
+		this.$el.remove()
+		this.destroyed = true
+	}
+
+	Base.prototype.$ = function(query) {
+		return this.$el.find(query)
+	}
+&lt;/code&gt;&lt;/pre&gt;
+
 &lt;p&gt;For &lt;code&gt;bui/index.js&lt;/code&gt;&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var Base = require(&#39;bui/base&#39;);
@@ -195,7 +313,7 @@ exports.cohere = function extends(Component) {
 };
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Example component:&lt;/p&gt;
+&lt;p&gt;Example component, &lt;code&gt;bui/lightbox.js&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;function Lightbox() {
   Lightbox.__super__.apply(this, arguments);
@@ -219,10 +337,12 @@ Lightbox.prototype.doSomething = function() {
 &lt;ol&gt;
 &lt;li&gt;Constructor function will have a reasonable name (easier for debug)&lt;/li&gt;
 &lt;li&gt;Less indentations&lt;/li&gt;
-&lt;li&gt;Clear indication of class method vs instance method.&lt;/li&gt;
+&lt;li&gt;Clearer indication of class methods vs instance methods.&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;h2 id=&#34;essentials:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Essentials&lt;/h2&gt;
+
+&lt;p&gt;events, iterators, debug, DOM utility, templates&amp;hellip;&lt;/p&gt;
 </description>
     </item>
     
