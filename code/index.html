@@ -1,0 +1,247 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+  <title>The &#34;Pefect&#34; Code</title>
+  <link rel="canonical" href="http://ktmud.com/code">
+<link rel="stylesheet" href="http://ktmud.com/assets/vendor.css">
+<link rel="stylesheet" href="http://ktmud.com/assets/app.css">
+
+
+
+
+</head>
+<body class="layout-single">
+  <div class="container absmiddle">
+
+<div class="home">
+  <h1 class="heading">The &#34;Pefect&#34; Code</h1>
+  <p class="slogan"><em></em>
+  
+
+<h2 id="directory-structure:cb7f612e17aad7eb26c06709ef92a867">Directory Structure</h2>
+
+<pre><code>static/
+└── js
+    ├── _modules
+    │   ├── booking
+    │   │   ├── env.js
+    │   │   ├── exp.js
+    │   │   ├── index.js
+    │   │   ├── mediator.js
+    │   │   └── track.js
+    │   │   ├── z.js
+    │   ├── bui
+    │   │   ├── base.js
+    │   │   ├── dropdown.js
+    │   │   └── lightbox.js
+    │   ├── essentials
+    │   │   ├── class.js
+    │   │   ├── debug.js
+    │   │   ├── eventEmitter.js
+    │   │   ├── lang.js
+    │   │   ├── dom.js
+    │   ├── fetch.js
+    │   ├── require.js
+    │   ├── require2.js
+    │   └── ~jyang2
+    │       └── lightbox2.js
+    ├── landingpages
+    │   ├── b.js
+    │   ├── c.js
+    │   └── exp_a.js
+    └── main
+        ├── 0.modules.js
+        └── z.initialize.js
+</code></pre>
+
+<h2 id="modules:cb7f612e17aad7eb26c06709ef92a867">Modules</h2>
+
+<p>Example file: <code>main/0.modules.js</code></p>
+
+<pre><code class="language-javascript">&lt;TMPL_INLINE _modules/require.js&gt;
+&lt;TMPL_INLINE _modules/fetch.js&gt;
+
+&lt;TMPL_JS_MODULE booking/exp&gt;
+&lt;TMPL_JS_MODULE booking/track&gt;
+&lt;TMPL_JS_MODULE booking/util&gt;
+
+&lt;TMPL_JS_MODULE ~jyang2/lightbox2&gt;
+
+// exports the booking global for easier usage
+window.booking = require('booking')
+
+
+// run initializers, bind DOMReady events
+booking.init();
+</code></pre>
+
+<p><code>TMPL_JS_MODULE</code> will wrap the file in CommonJS style.</p>
+
+<p>For file <code>static/js/_modules/booking/index.js</code>:</p>
+
+<pre><code class="language-javascript">exports.exp = require('./exp');
+// ... blah blah
+</code></pre>
+
+<p>A call of:</p>
+
+<pre><code class="language-javascript">&lt;TMPL_JS_MODULE booking/exp&gt;
+</code></pre>
+
+<p>Will be replaced with:</p>
+
+<pre><code class="language-javascript">require.register('booking/exp', function(exports, require, module) {
+
+exports.exp = require('booking/exp');
+// ... blah blah
+
+});
+</code></pre>
+
+<ul>
+<li>File path as module name</li>
+<li>Must omit suffix</li>
+<li>relative path were converted to absolute path (for static analysis)</li>
+<li>If directory, will use <code>directory/index.js</code></li>
+</ul>
+
+<h3 id="static-analysis:cb7f612e17aad7eb26c06709ef92a867">Static Analysis?</h3>
+
+<p>Suppose we have multiple script tags in one page.</p>
+
+<pre><code class="language-markup">&lt;script src=&quot;http://bstatic.jyang-app.dev.booking.com/main.js&quot;&gt;
+&lt;script src=&quot;http://bstatic.jyang-app.dev.booking.com/landingpages.js&quot;&gt;
+</code></pre>
+
+<p>And both file have included the same module <code>_modules/bui/lightbox.js</code>.</p>
+
+<p>When handling the request, server can analysis these JS files by simple grepping <code>require(.*)</code>, find out the duplicate includes, and give the developer warnings.</p>
+
+<h2 id="booking:cb7f612e17aad7eb26c06709ef92a867">booking.(&hellip;)</h2>
+
+<h3 id="booking-ready:cb7f612e17aad7eb26c06709ef92a867">booking.ready</h3>
+
+<p>A proxy to $.ready with priority support.
+Alternative for sNSStartup.</p>
+
+<pre><code class="language-javascript">booking.ready(function() {
+}, 5);
+</code></pre>
+
+<h3 id="booking-exp:cb7f612e17aad7eb26c06709ef92a867">booking.exp</h3>
+
+<p>Code:</p>
+
+<pre><code class="language-javascript">module.exports = exp
+
+var env = require('booking/env');
+
+function exp(name) {
+  var expriment = {
+    name: name,
+    hash: name  // add alias
+  };
+  env.expriments[name] = expriment;
+  return experiment;
+}
+</code></pre>
+
+<p>Example usage:</p>
+
+<pre><code class="language-javascript">(function() {
+
+var booking = require('booking');
+var Lightbox = require('bui/lightbox')
+
+var exp = booking.exp('&lt;TMPL_VAR b_expriment_hash_xxxx');
+
+// initialization setup for Base/Variants
+exp.initialize = function(variant) {
+  booking.track.custom_goal(this.name, 1);
+};
+
+exp.runVariant = function(variant) {
+  var box = new Lightbox();
+  if (variant == 2) {
+    box.setOption('xxx', true);
+  }
+}
+})()
+</code></pre>
+
+<h3 id="booking-medaitor:cb7f612e17aad7eb26c06709ef92a867">booking.medaitor</h3>
+
+<p>Events center, with pub/sub.</p>
+
+<pre><code>exports.subscribe = function() {
+}
+</code></pre>
+
+<h2 id="bui:cb7f612e17aad7eb26c06709ef92a867">BUI</h2>
+
+<p>Booking UI Components with conventions.</p>
+
+<h3 id="base-js:cb7f612e17aad7eb26c06709ef92a867">base.js</h3>
+
+<p>A boilterplate class, to provide conventions.</p>
+
+<p>An extentable class with standard methods about events/templates/$dom.</p>
+
+<p>For <code>bui/index.js</code></p>
+
+<pre><code class="language-javascript">var Base = require('bui/base');
+
+exports.cohere = function extends(Component) {
+  return __extend(Component, Base)
+};
+</code></pre>
+
+<p>Example component:</p>
+
+<pre><code class="language-javascript">function Lightbox() {
+  Lightbox.__super__.apply(this, arguments);
+}
+bui.cohere(Lightbox);
+
+Lightbox.prototype.doSomething = function() {
+  this.emit('event');  // emit &quot;event&quot; on the instance itself
+  this.publish('event'); // publish a global event &quot;lightbox:event&quot;
+};
+</code></pre>
+
+<p>Why not</p>
+
+<pre><code class="language-javascript">var Lightbox = BUIBase.extends({
+  doSomething: function() {
+  }
+})
+</code></pre>
+
+<ol>
+<li>Constructor function will have a reasonable name (easier for debug)</li>
+<li>Less indentations</li>
+<li>Clear indication of class method vs instance method.</li>
+</ol>
+
+<h2 id="essentials:cb7f612e17aad7eb26c06709ef92a867">Essentials</h2>
+
+</div>
+
+  </div>
+  <footer id="footer">
+
+  &copy; 2014 a kiloton of mud
+
+&nbsp;
+
+</footer>
+<script src="http://ktmud.com/assets/vendor.js"></script>
+<script src="http://ktmud.com/assets/app.js"></script>
+
+
+</body>
+</html>
+

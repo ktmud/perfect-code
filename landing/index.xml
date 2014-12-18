@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Landings on a kiloton of mud </title>
+    <link>http://ktmud.com/landing/</link>
+    <language></language>
+    <author></author>
+    <rights>Copyright (c) 2008 - 2013, ; all rights reserved.</rights>
+    <updated>2014-12-17 23:05:58 &#43;0100 CET</updated>
+    
+    <item>
+      <language></language>
+      <title>The &#34;Pefect&#34; Code</title>
+      <link>http://ktmud.com/code</link>
+      <pubDate>Wed, 17 Dec 2014 23:05:58 CET</pubDate>
+      <author></author>
+      <guid>http://ktmud.com/code</guid>
+      <description>
+
+&lt;h2 id=&#34;directory-structure:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Directory Structure&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;static/
+└── js
+    ├── _modules
+    │   ├── booking
+    │   │   ├── env.js
+    │   │   ├── exp.js
+    │   │   ├── index.js
+    │   │   ├── mediator.js
+    │   │   └── track.js
+    │   │   ├── z.js
+    │   ├── bui
+    │   │   ├── base.js
+    │   │   ├── dropdown.js
+    │   │   └── lightbox.js
+    │   ├── essentials
+    │   │   ├── class.js
+    │   │   ├── debug.js
+    │   │   ├── eventEmitter.js
+    │   │   ├── lang.js
+    │   │   ├── dom.js
+    │   ├── fetch.js
+    │   ├── require.js
+    │   ├── require2.js
+    │   └── ~jyang2
+    │       └── lightbox2.js
+    ├── landingpages
+    │   ├── b.js
+    │   ├── c.js
+    │   └── exp_a.js
+    └── main
+        ├── 0.modules.js
+        └── z.initialize.js
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;modules:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Modules&lt;/h2&gt;
+
+&lt;p&gt;Example file: &lt;code&gt;main/0.modules.js&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;&amp;lt;TMPL_INLINE _modules/require.js&amp;gt;
+&amp;lt;TMPL_INLINE _modules/fetch.js&amp;gt;
+
+&amp;lt;TMPL_JS_MODULE booking/exp&amp;gt;
+&amp;lt;TMPL_JS_MODULE booking/track&amp;gt;
+&amp;lt;TMPL_JS_MODULE booking/util&amp;gt;
+
+&amp;lt;TMPL_JS_MODULE ~jyang2/lightbox2&amp;gt;
+
+// exports the booking global for easier usage
+window.booking = require(&#39;booking&#39;)
+
+
+// run initializers, bind DOMReady events
+booking.init();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;TMPL_JS_MODULE&lt;/code&gt; will wrap the file in CommonJS style.&lt;/p&gt;
+
+&lt;p&gt;For file &lt;code&gt;static/js/_modules/booking/index.js&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;exports.exp = require(&#39;./exp&#39;);
+// ... blah blah
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A call of:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;&amp;lt;TMPL_JS_MODULE booking/exp&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Will be replaced with:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;require.register(&#39;booking/exp&#39;, function(exports, require, module) {
+
+exports.exp = require(&#39;booking/exp&#39;);
+// ... blah blah
+
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;File path as module name&lt;/li&gt;
+&lt;li&gt;Must omit suffix&lt;/li&gt;
+&lt;li&gt;relative path were converted to absolute path (for static analysis)&lt;/li&gt;
+&lt;li&gt;If directory, will use &lt;code&gt;directory/index.js&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;static-analysis:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Static Analysis?&lt;/h3&gt;
+
+&lt;p&gt;Suppose we have multiple script tags in one page.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-markup&#34;&gt;&amp;lt;script src=&amp;quot;http://bstatic.jyang-app.dev.booking.com/main.js&amp;quot;&amp;gt;
+&amp;lt;script src=&amp;quot;http://bstatic.jyang-app.dev.booking.com/landingpages.js&amp;quot;&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And both file have included the same module &lt;code&gt;_modules/bui/lightbox.js&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;When handling the request, server can analysis these JS files by simple grepping &lt;code&gt;require(.*)&lt;/code&gt;, find out the duplicate includes, and give the developer warnings.&lt;/p&gt;
+
+&lt;h2 id=&#34;booking:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.(&amp;hellip;)&lt;/h2&gt;
+
+&lt;h3 id=&#34;booking-ready:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.ready&lt;/h3&gt;
+
+&lt;p&gt;A proxy to $.ready with priority support.
+Alternative for sNSStartup.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;booking.ready(function() {
+}, 5);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;booking-exp:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.exp&lt;/h3&gt;
+
+&lt;p&gt;Code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;module.exports = exp
+
+var env = require(&#39;booking/env&#39;);
+
+function exp(name) {
+  var expriment = {
+    name: name,
+    hash: name  // add alias
+  };
+  env.expriments[name] = expriment;
+  return experiment;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Example usage:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;(function() {
+
+var booking = require(&#39;booking&#39;);
+var Lightbox = require(&#39;bui/lightbox&#39;)
+
+var exp = booking.exp(&#39;&amp;lt;TMPL_VAR b_expriment_hash_xxxx&#39;);
+
+// initialization setup for Base/Variants
+exp.initialize = function(variant) {
+  booking.track.custom_goal(this.name, 1);
+};
+
+exp.runVariant = function(variant) {
+  var box = new Lightbox();
+  if (variant == 2) {
+    box.setOption(&#39;xxx&#39;, true);
+  }
+}
+})()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;booking-medaitor:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.medaitor&lt;/h3&gt;
+
+&lt;p&gt;Events center, with pub/sub.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;exports.subscribe = function() {
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;bui:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;BUI&lt;/h2&gt;
+
+&lt;p&gt;Booking UI Components with conventions.&lt;/p&gt;
+
+&lt;h3 id=&#34;base-js:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;base.js&lt;/h3&gt;
+
+&lt;p&gt;A boilterplate class, to provide conventions.&lt;/p&gt;
+
+&lt;p&gt;An extentable class with standard methods about events/templates/$dom.&lt;/p&gt;
+
+&lt;p&gt;For &lt;code&gt;bui/index.js&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var Base = require(&#39;bui/base&#39;);
+
+exports.cohere = function extends(Component) {
+  return __extend(Component, Base)
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Example component:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;function Lightbox() {
+  Lightbox.__super__.apply(this, arguments);
+}
+bui.cohere(Lightbox);
+
+Lightbox.prototype.doSomething = function() {
+  this.emit(&#39;event&#39;);  // emit &amp;quot;event&amp;quot; on the instance itself
+  this.publish(&#39;event&#39;); // publish a global event &amp;quot;lightbox:event&amp;quot;
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Why not&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var Lightbox = BUIBase.extends({
+  doSomething: function() {
+  }
+})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Constructor function will have a reasonable name (easier for debug)&lt;/li&gt;
+&lt;li&gt;Less indentations&lt;/li&gt;
+&lt;li&gt;Clear indication of class method vs instance method.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;essentials:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Essentials&lt;/h2&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
