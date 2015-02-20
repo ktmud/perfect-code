@@ -61,7 +61,7 @@
 &lt;li&gt;&lt;code&gt;booking&lt;/code&gt; is modules only validate within Booking.com context, like tracking, translation, client side HTMLTemplate, env variable management, experiment setup, and how do we initialize things.
 &lt;code&gt;essentials&lt;/code&gt; are more generic things, which are often replaceable with community solutions.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;~username&lt;/code&gt; are modules not mature enough for sharing. Should be moved into &lt;code&gt;bui&lt;/code&gt; when stable.&lt;/li&gt;
-&lt;li&gt;Things in &lt;code&gt;\_modules&lt;/code&gt; will not be concated into one file. You must inline/include them.&lt;/li&gt;
+&lt;li&gt;Things in &lt;code&gt;_modules&lt;/code&gt; will not be concated into one file. You must inline/include them.&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;h2 id=&#34;modules:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Modules&lt;/h2&gt;
@@ -142,9 +142,9 @@ exports.setup = exports.init.setup;
 &amp;lt;script src=&amp;quot;http://bstatic.jyang-app.dev.booking.com/landingpages.js&amp;quot;&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;And both file have included the same module &lt;code&gt;\_modules/bui/lightbox.js&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;And both file have included the same module &lt;code&gt;_modules/bui/lightbox.js&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;When handling the request, server can analysis these JS files by simple grepping &lt;code&gt;require(.\*)&lt;/code&gt;,
+&lt;p&gt;When handling the request, server can analysis these JS files by simple grepping &lt;code&gt;require(.*)&lt;/code&gt;,
 so to find out the duplicate includes, and give developer warnings.&lt;/p&gt;
 
 &lt;h3 id=&#34;start-using-this-pattern-today:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Start using this pattern today&lt;/h3&gt;
@@ -152,8 +152,8 @@ so to find out the duplicate includes, and give developer warnings.&lt;/p&gt;
 &lt;p&gt;Actually, we can start using this pattern today! Just replace &lt;code&gt;&amp;lt;TMPL_JS_MODULE&amp;gt;&lt;/code&gt; with &lt;code&gt;&amp;lt;TMPL_INLINE&amp;gt;&lt;/code&gt;
 and a mannual wrapping of &lt;code&gt;require.register&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;require.register(&#39;core/searchbox&#39;, function(exports, require, module) {
-&amp;lt;TMPL_INLINE mobilejs:_modules/core/searchbox&amp;gt;
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;require.register(&#39;core/searchbox&#39;, function(exports, require, module) {
+	&amp;lt;TMPL_INLINE mobilejs:_modules/core/searchbox&amp;gt;
 });
 &lt;/code&gt;&lt;/pre&gt;
 
