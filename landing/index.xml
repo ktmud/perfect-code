@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title>Landings on a kiloton of mud </title>
+      <title>Landings on Perfect code </title>
     <link>http://ktmud.github.io/perfect-code/landing/</link>
     <language></language>
     <author></author>
@@ -10,7 +10,7 @@
     
     <item>
       <language></language>
-      <title>The &#34;Pefect&#34; Code</title>
+      <title>The &#34;Perfect&#34; Code</title>
       <link>http://ktmud.github.io/perfect-code/code</link>
       <pubDate>Wed, 17 Dec 2014 23:05:58 CET</pubDate>
       <author></author>
@@ -61,7 +61,7 @@
 &lt;li&gt;&lt;code&gt;booking&lt;/code&gt; is modules only validate within Booking.com context, like tracking, translation, client side HTMLTemplate, env variable management, experiment setup, and how do we initialize things.
 &lt;code&gt;essentials&lt;/code&gt; are more generic things, which are often replaceable with community solutions.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;~username&lt;/code&gt; are modules not mature enough for sharing. Should be moved into &lt;code&gt;bui&lt;/code&gt; when stable.&lt;/li&gt;
-&lt;li&gt;Things in &lt;code&gt;_modules&lt;/code&gt; will not concat into one file. You must inline/include them.&lt;/li&gt;
+&lt;li&gt;Things in &lt;code&gt;\_modules&lt;/code&gt; will not be concated into one file. You must inline/include them.&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;h2 id=&#34;modules:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Modules&lt;/h2&gt;
@@ -89,16 +89,15 @@ booking.init();
 
 &lt;p&gt;&lt;code&gt;TMPL_JS_MODULE&lt;/code&gt; will wrap the file in CommonJS style.&lt;/p&gt;
 
-&lt;p&gt;For file &lt;a href=&#34;https://github.com/ktmud/perfect-code/blob/gh-pages/js/_modules/booking/index.js&#34;&gt;static/js/_modules/booking/index.js&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;Say we have a file: &lt;a href=&#34;https://github.com/ktmud/perfect-code/blob/gh-pages/js/_modules/booking/index.js&#34;&gt;static/js/_modules/booking/index.js&lt;/a&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;
-exports.track = require(&#39;./track&#39;);
+&lt;p&gt;With content:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;exports.track = require(&#39;./track&#39;);
 exports.env = require(&#39;./env&#39;);
-
 
 exports.init = require(&#39;./runner&#39;);
 exports.setup = exports.init.setup;
-
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;A call of:&lt;/p&gt;
@@ -109,22 +108,20 @@ exports.setup = exports.init.setup;
 &lt;p&gt;Will be replaced with:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;require.register(&#39;booking/index&#39;, function(exports, require, module) {
-
 exports.track = require(&#39;booking/track&#39;);
 exports.env = require(&#39;booking/env&#39;);
 
-
 exports.init = require(&#39;booking/runner&#39;);
 exports.setup = exports.init.setup;
-
-
 });
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;Note that:&lt;/p&gt;
+
 &lt;ul&gt;
-&lt;li&gt;File path as module name (no confused module names!)&lt;/li&gt;
-&lt;li&gt;Must omit suffix&lt;/li&gt;
-&lt;li&gt;relative path in &lt;code&gt;require()&lt;/code&gt; were converted to absolute path (for statical analysis)&lt;/li&gt;
+&lt;li&gt;The name you passed to &lt;TMPL_JS_MODULE&gt; will be registered as module name (no confused module names!)&lt;/li&gt;
+&lt;li&gt;Must omit suffix, must use absolute path, because we want to use this argument directly as module name.&lt;/li&gt;
+&lt;li&gt;Relative path in &lt;code&gt;require()&lt;/code&gt; were converted to absolute path (for static analysis)&lt;/li&gt;
 &lt;li&gt;If required a directory, will use &lt;code&gt;directory/index.js&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -145,10 +142,20 @@ exports.setup = exports.init.setup;
 &amp;lt;script src=&amp;quot;http://bstatic.jyang-app.dev.booking.com/landingpages.js&amp;quot;&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;And both file have included the same module &lt;code&gt;_modules/bui/lightbox.js&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;And both file have included the same module &lt;code&gt;\_modules/bui/lightbox.js&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;When handling the request, server can analysis these JS files by simple grepping &lt;code&gt;require(.*)&lt;/code&gt;,
+&lt;p&gt;When handling the request, server can analysis these JS files by simple grepping &lt;code&gt;require(.\*)&lt;/code&gt;,
 so to find out the duplicate includes, and give developer warnings.&lt;/p&gt;
+
+&lt;h3 id=&#34;start-using-this-pattern-today:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;Start using this pattern today&lt;/h3&gt;
+
+&lt;p&gt;Actually, we can start using this pattern today! Just replace &lt;code&gt;&amp;lt;TMPL_JS_MODULE&amp;gt;&lt;/code&gt; with &lt;code&gt;&amp;lt;TMPL_INLINE&amp;gt;&lt;/code&gt;
+and a mannual wrapping of &lt;code&gt;require.register&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;require.register(&#39;core/searchbox&#39;, function(exports, require, module) {
+&amp;lt;TMPL_INLINE mobilejs:_modules/core/searchbox&amp;gt;
+});
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&#34;booking:cb7f612e17aad7eb26c06709ef92a867&#34;&gt;booking.(&amp;hellip;)&lt;/h2&gt;
 

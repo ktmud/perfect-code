@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-  <title>The &#34;Pefect&#34; Code</title>
+  <title>The &#34;Perfect&#34; Code</title>
   <link rel="canonical" href="http://ktmud.github.io/perfect-code/code">
 <link rel="stylesheet" href="http://ktmud.github.io/perfect-code/assets/vendor.css">
 <link rel="stylesheet" href="http://ktmud.github.io/perfect-code/assets/app.css">
@@ -17,7 +17,7 @@
   <div class="container absmiddle">
 
 <div class="home">
-  <h1 class="heading">The &#34;Pefect&#34; Code</h1>
+  <h1 class="heading">The &#34;Perfect&#34; Code</h1>
   <p class="slogan"><em></em>
   
 
@@ -65,7 +65,7 @@
 <li><code>booking</code> is modules only validate within Booking.com context, like tracking, translation, client side HTMLTemplate, env variable management, experiment setup, and how do we initialize things.
 <code>essentials</code> are more generic things, which are often replaceable with community solutions.</li>
 <li><code>~username</code> are modules not mature enough for sharing. Should be moved into <code>bui</code> when stable.</li>
-<li>Things in <code>_modules</code> will not concat into one file. You must inline/include them.</li>
+<li>Things in <code>\_modules</code> will not be concated into one file. You must inline/include them.</li>
 </ol>
 
 <h2 id="modules:cb7f612e17aad7eb26c06709ef92a867">Modules</h2>
@@ -93,16 +93,15 @@ booking.init();
 
 <p><code>TMPL_JS_MODULE</code> will wrap the file in CommonJS style.</p>
 
-<p>For file <a href="https://github.com/ktmud/perfect-code/blob/gh-pages/js/_modules/booking/index.js">static/js/_modules/booking/index.js</a>:</p>
+<p>Say we have a file: <a href="https://github.com/ktmud/perfect-code/blob/gh-pages/js/_modules/booking/index.js">static/js/_modules/booking/index.js</a>:</p>
 
-<pre><code class="language-javascript">
-exports.track = require('./track');
+<p>With content:</p>
+
+<pre><code class="language-javascript">exports.track = require('./track');
 exports.env = require('./env');
-
 
 exports.init = require('./runner');
 exports.setup = exports.init.setup;
-
 </code></pre>
 
 <p>A call of:</p>
@@ -113,22 +112,20 @@ exports.setup = exports.init.setup;
 <p>Will be replaced with:</p>
 
 <pre><code class="language-javascript">require.register('booking/index', function(exports, require, module) {
-
 exports.track = require('booking/track');
 exports.env = require('booking/env');
 
-
 exports.init = require('booking/runner');
 exports.setup = exports.init.setup;
-
-
 });
 </code></pre>
 
+<p>Note that:</p>
+
 <ul>
-<li>File path as module name (no confused module names!)</li>
-<li>Must omit suffix</li>
-<li>relative path in <code>require()</code> were converted to absolute path (for statical analysis)</li>
+<li>The name you passed to <TMPL_JS_MODULE> will be registered as module name (no confused module names!)</li>
+<li>Must omit suffix, must use absolute path, because we want to use this argument directly as module name.</li>
+<li>Relative path in <code>require()</code> were converted to absolute path (for static analysis)</li>
 <li>If required a directory, will use <code>directory/index.js</code></li>
 </ul>
 
@@ -149,10 +146,20 @@ exports.setup = exports.init.setup;
 &lt;script src=&quot;http://bstatic.jyang-app.dev.booking.com/landingpages.js&quot;&gt;
 </code></pre>
 
-<p>And both file have included the same module <code>_modules/bui/lightbox.js</code>.</p>
+<p>And both file have included the same module <code>\_modules/bui/lightbox.js</code>.</p>
 
-<p>When handling the request, server can analysis these JS files by simple grepping <code>require(.*)</code>,
+<p>When handling the request, server can analysis these JS files by simple grepping <code>require(.\*)</code>,
 so to find out the duplicate includes, and give developer warnings.</p>
+
+<h3 id="start-using-this-pattern-today:cb7f612e17aad7eb26c06709ef92a867">Start using this pattern today</h3>
+
+<p>Actually, we can start using this pattern today! Just replace <code>&lt;TMPL_JS_MODULE&gt;</code> with <code>&lt;TMPL_INLINE&gt;</code>
+and a mannual wrapping of <code>require.register</code>:</p>
+
+<pre><code>require.register('core/searchbox', function(exports, require, module) {
+&lt;TMPL_INLINE mobilejs:_modules/core/searchbox&gt;
+});
+</code></pre>
 
 <h2 id="booking:cb7f612e17aad7eb26c06709ef92a867">booking.(&hellip;)</h2>
 
@@ -459,7 +466,7 @@ Everything here should be replaceable. In case we found better solutions.</p>
   </div>
   <footer id="footer">
 
-  &copy; 2014 a kiloton of mud
+  &copy; 2014 Perfect code
 
 &nbsp;
 
