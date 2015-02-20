@@ -1,6 +1,6 @@
 ---
 date: 2014-12-17T23:05:58+01:00
-title: The "Pefect" Code
+title: The "Perfect" Code
 slug: code
 
 ---
@@ -49,7 +49,7 @@ static/
 1. `booking` is modules only validate within Booking.com context, like tracking, translation, client side HTMLTemplate, env variable management, experiment setup, and how do we initialize things.
 `essentials` are more generic things, which are often replaceable with community solutions.
 2. `~username` are modules not mature enough for sharing. Should be moved into `bui` when stable.
-3. Things in `_modules` will not concat into one file. You must inline/include them.
+3. Things in `\_modules` will not be concated into one file. You must inline/include them.
 
 ## Modules
 
@@ -77,18 +77,19 @@ booking.init();
 
 `TMPL_JS_MODULE` will wrap the file in CommonJS style.
 
-For file [static/js/_modules/booking/index.js](https://github.com/ktmud/perfect-code/blob/gh-pages/js/_modules/booking/index.js):
+
+Say we have a file: [static/js/_modules/booking/index.js](https://github.com/ktmud/perfect-code/blob/gh-pages/js/_modules/booking/index.js):
+
+With content:
 
 ```javascript
-
 exports.track = require('./track');
 exports.env = require('./env');
 
-
 exports.init = require('./runner');
 exports.setup = exports.init.setup;
-
 ```
+
 
 A call of:
 
@@ -100,22 +101,21 @@ Will be replaced with:
 
 ```javascript
 require.register('booking/index', function(exports, require, module) {
-
 exports.track = require('booking/track');
 exports.env = require('booking/env');
 
-
 exports.init = require('booking/runner');
 exports.setup = exports.init.setup;
-
-
 });
 ```
 
-- File path as module name (no confused module names!)
-- Must omit suffix
-- relative path in `require()` were converted to absolute path (for statical analysis)
+Note that:
+
+- The name you passed to <TMPL_JS_MODULE> will be registered as module name (no confused module names!)
+- Must omit suffix, must use absolute path, because we want to use this argument directly as module name.
+- Relative path in `require()` were converted to absolute path (for static analysis)
 - If required a directory, will use `directory/index.js`
+
 
 ### Why CommonJS over AMD?
 
@@ -134,10 +134,23 @@ Suppose we have multiple script tags in one page.
 <script src="http://bstatic.jyang-app.dev.booking.com/landingpages.js">
 ```
 
-And both file have included the same module `_modules/bui/lightbox.js`.
+And both file have included the same module `\_modules/bui/lightbox.js`.
 
-When handling the request, server can analysis these JS files by simple grepping `require(.*)`,
+When handling the request, server can analysis these JS files by simple grepping `require(.\*)`,
 so to find out the duplicate includes, and give developer warnings.
+
+
+### Start using this pattern today
+
+
+Actually, we can start using this pattern today! Just replace `<TMPL_JS_MODULE>` with `<TMPL_INLINE>`
+and a mannual wrapping of `require.register`:
+
+```
+require.register('core/searchbox', function(exports, require, module) {
+<TMPL_INLINE mobilejs:_modules/core/searchbox>
+});
+```
 
 
 ## booking.(...)

@@ -1,7 +1,7 @@
 theme = "huggle"
 baseurl = "http://ktmud.github.io/perfect-code"
 languageCode = "en-us"
-title = "a kiloton of mud"
+title = "Perfect code"
 
 [permalinks]
 landing = "/:slug"
