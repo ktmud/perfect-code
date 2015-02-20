@@ -49,7 +49,7 @@ static/
 1. `booking` is modules only validate within Booking.com context, like tracking, translation, client side HTMLTemplate, env variable management, experiment setup, and how do we initialize things.
 `essentials` are more generic things, which are often replaceable with community solutions.
 2. `~username` are modules not mature enough for sharing. Should be moved into `bui` when stable.
-3. Things in `\_modules` will not be concated into one file. You must inline/include them.
+3. Things in `_modules` will not be concated into one file. You must inline/include them.
 
 ## Modules
 
@@ -134,9 +134,9 @@ Suppose we have multiple script tags in one page.
 <script src="http://bstatic.jyang-app.dev.booking.com/landingpages.js">
 ```
 
-And both file have included the same module `\_modules/bui/lightbox.js`.
+And both file have included the same module `_modules/bui/lightbox.js`.
 
-When handling the request, server can analysis these JS files by simple grepping `require(.\*)`,
+When handling the request, server can analysis these JS files by simple grepping `require(.*)`,
 so to find out the duplicate includes, and give developer warnings.
 
 
@@ -146,9 +146,9 @@ so to find out the duplicate includes, and give developer warnings.
 Actually, we can start using this pattern today! Just replace `<TMPL_JS_MODULE>` with `<TMPL_INLINE>`
 and a mannual wrapping of `require.register`:
 
-```
+```javascript
 require.register('core/searchbox', function(exports, require, module) {
-<TMPL_INLINE mobilejs:_modules/core/searchbox>
+	<TMPL_INLINE mobilejs:_modules/core/searchbox>
 });
 ```
 
